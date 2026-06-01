@@ -191,30 +191,26 @@ contract RaffleTest is Test, CodeConstants {
         raffle.performUpkeep("");
     }
 
-    function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId() public {
-        // Arrange
-        vm.prank(PLAYER);
-        raffle.enterRaffle{value: raffleEntranceFee}();
-        vm.warp(block.timestamp + automationUpdateInterval + 1);
-        vm.roll(block.number + 1);
-
-        // Act
+    function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId() public raffleEnteredAndTimePassed {
         vm.recordLogs();
-        raffle.performUpkeep(""); // emits requestId
+
+        raffle.performUpkeep("");
+
         Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        // VRF event + nuestro event
         bytes32 requestId = entries[1].topics[1];
 
-        // Assert
         Raffle.RaffleState raffleState = raffle.getRaffleState();
-        // requestId = raffle.getLastRequestId();
+
         assert(uint256(requestId) > 0);
-        assert(uint256(raffleState) == 1); // 0 = open, 1 = calculating
+        assert(uint256(raffleState) == 1); // CALCULATING
     }
 
     /*//////////////////////////////////////////////////////////////
                            FULFILLRANDOMWORDS
     //////////////////////////////////////////////////////////////*/
-    modifier raffleEntered() {
+    modifier raffleEnteredAndTimePassed() {
         vm.prank(PLAYER);
         raffle.enterRaffle{value: raffleEntranceFee}();
         vm.warp(block.timestamp + automationUpdateInterval + 1);
@@ -223,24 +219,22 @@ contract RaffleTest is Test, CodeConstants {
     }
 
     modifier skipFork() {
-        if (block.chainid != 31337) {
+        if (block.chainid != LOCAL_CHAIN_ID) {
             return;
         }
         _;
     }
 
-    function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep() public raffleEntered skipFork {
-        // Arrange
-        // Act / Assert
+    function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId)
+        public
+        raffleEnteredAndTimePassed
+    {
         vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
-        // vm.mockCall could be used here...
-        VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(0, address(raffle));
 
-        vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
-        VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(1, address(raffle));
+        VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(randomRequestId, address(raffle));
     }
 
-    function testFulfillRandomWordsPicksAWinnerResetsAndSendsMoney() public raffleEntered skipFork {
+    function testFulfillRandomWordsPicksAWinnerResetsAndSendsMoney() public raffleEnteredAndTimePassed {
         address expectedWinner = address(1);
 
         // Arrange

@@ -9,7 +9,7 @@ import {Raffle} from "../../src/Raffle.sol";
 contract InteractionsTest is Test {
     function testAddConsumerRuns() public {
         DeployRaffle deploy = new DeployRaffle();
-        (Raffle raffle, ) = deploy.run();
+        (Raffle raffle,) = deploy.run();
 
         assert(address(raffle) != address(0));
     }

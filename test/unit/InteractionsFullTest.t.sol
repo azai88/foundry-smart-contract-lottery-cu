@@ -14,10 +14,7 @@ contract InteractionsFullTest is Test {
         // 1. Create subscription
         CreateSubscription create = new CreateSubscription();
 
-        (uint256 subId, address subOwner) = create.createSubscription(
-            net.vrfCoordinatorV2_5,
-            net.account
-        );
+        (uint256 subId, address subOwner) = create.createSubscription(net.vrfCoordinatorV2_5, net.account);
 
         // sanity check (evita warnings de unused vars)
         assert(subId > 0);
@@ -26,12 +23,7 @@ contract InteractionsFullTest is Test {
         // 2. Fund subscription
         FundSubscription fund = new FundSubscription();
 
-        fund.fundSubscription(
-            net.vrfCoordinatorV2_5,
-            subId,
-            net.link,
-            net.account
-        );
+        fund.fundSubscription(net.vrfCoordinatorV2_5, subId, net.link, net.account);
 
         // 3. Add consumer (mock raffle address para test)
         AddConsumer add = new AddConsumer();

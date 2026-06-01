@@ -12,14 +12,10 @@ import {LinkToken} from "../test/mocks/LinkToken.sol";
 // CREATE SUBSCRIPTION
 //////////////////////////////
 contract CreateSubscription is Script {
-    function createSubscription(
-        address vrfCoordinator,
-        address account
-    ) public returns (uint256, address) {
+    function createSubscription(address vrfCoordinator, address account) public returns (uint256, address) {
         vm.startBroadcast(account);
 
-        uint256 subId = VRFCoordinatorV2_5Mock(vrfCoordinator)
-            .createSubscription();
+        uint256 subId = VRFCoordinatorV2_5Mock(vrfCoordinator).createSubscription();
 
         vm.stopBroadcast();
 
@@ -44,25 +40,13 @@ contract CreateSubscription is Script {
 contract FundSubscription is Script, CodeConstants {
     uint96 public constant FUND_AMOUNT = 3 ether;
 
-    function fundSubscription(
-        address vrfCoordinator,
-        uint256 subId,
-        address link,
-        address account
-    ) public {
+    function fundSubscription(address vrfCoordinator, uint256 subId, address link, address account) public {
         vm.startBroadcast(account);
 
         if (block.chainid == LOCAL_CHAIN_ID) {
-            VRFCoordinatorV2_5Mock(vrfCoordinator).fundSubscription(
-                subId,
-                FUND_AMOUNT
-            );
+            VRFCoordinatorV2_5Mock(vrfCoordinator).fundSubscription(subId, FUND_AMOUNT);
         } else {
-            LinkToken(link).transferAndCall(
-                vrfCoordinator,
-                FUND_AMOUNT,
-                abi.encode(subId)
-            );
+            LinkToken(link).transferAndCall(vrfCoordinator, FUND_AMOUNT, abi.encode(subId));
         }
 
         vm.stopBroadcast();
@@ -72,12 +56,7 @@ contract FundSubscription is Script, CodeConstants {
         HelperConfig config = new HelperConfig();
         HelperConfig.NetworkConfig memory net = config.getConfig();
 
-        fundSubscription(
-            net.vrfCoordinatorV2_5,
-            net.subscriptionId,
-            net.link,
-            net.account
-        );
+        fundSubscription(net.vrfCoordinatorV2_5, net.subscriptionId, net.link, net.account);
     }
 
     function run() external {
@@ -89,12 +68,7 @@ contract FundSubscription is Script, CodeConstants {
 // ADD CONSUMER
 //////////////////////////////
 contract AddConsumer is Script {
-    function addConsumer(
-        address raffle,
-        address vrfCoordinator,
-        uint256 subId,
-        address account
-    ) public {
+    function addConsumer(address raffle, address vrfCoordinator, uint256 subId, address account) public {
         vm.startBroadcast(account);
 
         VRFCoordinatorV2_5Mock(vrfCoordinator).addConsumer(subId, raffle);
@@ -106,12 +80,7 @@ contract AddConsumer is Script {
         HelperConfig config = new HelperConfig();
         HelperConfig.NetworkConfig memory net = config.getConfig();
 
-        addConsumer(
-            raffle,
-            net.vrfCoordinatorV2_5,
-            net.subscriptionId,
-            net.account
-        );
+        addConsumer(raffle, net.vrfCoordinatorV2_5, net.subscriptionId, net.account);
     }
 
     // 🔥 FIX CLAVE: NO filesystem, NO DevOpsTools
@@ -131,11 +100,6 @@ contract AddConsumerScript is Script {
 
         AddConsumer add = new AddConsumer();
 
-        add.addConsumer(
-            raffle,
-            net.vrfCoordinatorV2_5,
-            net.subscriptionId,
-            net.account
-        );
+        add.addConsumer(raffle, net.vrfCoordinatorV2_5, net.subscriptionId, net.account);
     }
 }
