@@ -16,3 +16,25 @@ docs/
 
 # zkSync
 zkout/
+
+# Foundry
+cache/
+out/
+broadcast/
+
+# env
+.env
+
+# node / deps (si aplica)
+node_modules/
+
+# Foundry artifacts
+cache/
+out/
+broadcast/
+
+# dotenv
+.env
+
+# forge artifacts duplicados
+*.log
